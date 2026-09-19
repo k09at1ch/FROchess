@@ -150,7 +150,7 @@ function Play() {
     <div>
       <button onClick={() => navigate("/")}>
         <img
-          src="/public/frochess-logo.png"
+          src="./public/frochess-logo.png"
           alt="Logo"
           style={{ width: "60px", height: "90px" }}
         />
