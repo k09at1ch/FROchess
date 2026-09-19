@@ -136,9 +136,7 @@ function Play() {
             //
           }
       }
-//adadasdasdadasd
-//gegwer2r2rqwre
-//qr4tgwdfraafad
+
       setPosition(newPosition);
       setSelectedPiece(null);
       setMoveAmount(moveAmount + 1);
