@@ -130,15 +130,15 @@ function Play() {
           break;
       }
 
-      // console.log(newPosition[rowIndex][tileIndex], newPosition);
-
       switch (selectedPiece) {
         case 10:
           if (prevPositionRef.current[0] === 6) {
             //
           }
       }
-
+//adadasdasdadasd
+//gegwer2r2rqwre
+//qr4tgwdfraafad
       setPosition(newPosition);
       setSelectedPiece(null);
       setMoveAmount(moveAmount + 1);
