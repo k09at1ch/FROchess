@@ -37,7 +37,6 @@ function Play() {
     [1, 0, 1, 0, 1, 0, 1, 0],
     [0, 1, 0, 1, 0, 1, 0, 1],
   ]);
-//edit
   const [position, setPosition] = useState(() => {
     const savedPosition = localStorage.getItem("position");
     return savedPosition && savedPosition!=="undefined"
