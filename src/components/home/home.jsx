@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
-
+  //asdasdadasd
   return (
     <div>
       {" "}
@@ -14,6 +14,7 @@ function Home() {
         />
       </button>
       <h1>Home</h1>
+      
       <button onClick={() => navigate("/play")}>Play</button>
     </div>
   );
