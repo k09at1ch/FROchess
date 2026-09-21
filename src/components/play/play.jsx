@@ -52,7 +52,6 @@ function Play() {
           [50, 40, 30, 90, 20, 30, 40, 50],
         ];
   });
-//
   useEffect(() => {
     localStorage.setItem("position", JSON.stringify(position));
     localStorage.setItem("moveAmount", JSON.stringify(moveAmount));
