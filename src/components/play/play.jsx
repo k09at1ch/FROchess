@@ -20,7 +20,9 @@ function Play() {
   const [prevPosition, setPrevPosition] = useState([null, null]);
   const [moveAmount, setMoveAmount] = useState(() => {
     const savedMoveAmount = localStorage.getItem("moveAmount");
-    return savedMoveAmount && savedMoveAmount!=="undefined" ? JSON.parse(savedMoveAmount) : 0;
+    return savedMoveAmount && savedMoveAmount !== "undefined"
+      ? JSON.parse(savedMoveAmount)
+      : 0;
   });
   const prevRowIndexRef = useRef(null);
   const prevPositionRef = useRef([null, null]);
@@ -39,7 +41,7 @@ function Play() {
   ]);
   const [position, setPosition] = useState(() => {
     const savedPosition = localStorage.getItem("position");
-    return savedPosition && savedPosition!=="undefined"
+    return savedPosition && savedPosition !== "undefined"
       ? JSON.parse(savedPosition)
       : [
           [5, 4, 3, 9, 2, 3, 4, 5],
@@ -100,6 +102,7 @@ function Play() {
   };
 
   const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
+    const activePiece = selectedPieceRef.current;
     setPrevPosition([rowIndex, tileIndex]);
     prevPositionRef.current = [rowIndex, tileIndex];
 
@@ -119,18 +122,18 @@ function Play() {
     if (rowIndex >= 0) {
       if (
         prevRowIndexRef.current !== 6 &&
-        selectedPieceRef.current === 10 &&
+        activePiece === 10 &&
         prevRowIndexRef.current - rowIndex > 1
       ) {
-        selectedPieceRef.current = null;
+        // selectedPieceRef.current = null;
         return;
       }
       if (
         prevRowIndexRef.current !== 1 &&
-        selectedPieceRef.current === 1 &&
+        activePiece === 1 &&
         rowIndex - prevRowIndexRef.current > 1
       ) {
-        selectedPieceRef.current = null;
+        // selectedPieceRef.current = null;
         return;
       }
     }
@@ -138,18 +141,18 @@ function Play() {
     if (rowIndex >= 0) {
       if (
         prevRowIndexRef.current === 6 &&
-        selectedPieceRef.current === 10 &&
+        activePiece === 10 &&
         prevPositionRef.current[0] < 4
       ) {
-        selectedPieceRef.current = null;
+        // selectedPieceRef.current = null;
         return;
       }
       if (
         prevRowIndexRef.current === 1 &&
-        selectedPieceRef.current === 1 &&
+        activePiece === 1 &&
         prevPositionRef.current[0] > 3
       ) {
-        selectedPieceRef.current = null;
+        // selectedPieceRef.current = null;
         return;
       }
     }
@@ -159,9 +162,6 @@ function Play() {
     if (currentPiece > 0) {
       setSelectedPiece(currentPiece);
       selectedPieceRef.current = currentPiece;
-    } else {
-      setSelectedPiece(null);
-      selectedPieceRef.current = null;
     }
 
     if (teamCheck(selectedPiece) === teamCheck(position[rowIndex][tileIndex])) {
@@ -211,6 +211,7 @@ function Play() {
 
       setPosition(newPosition);
       setSelectedPiece(null);
+      selectedPieceRef.current = null;
       setMoveAmount(moveAmount + 1);
       setPrevPosition([]);
       selectedPieceRef.current = null;
@@ -221,25 +222,29 @@ function Play() {
     <div>
       <button onClick={() => navigate("/")}>
         <img
-          src="./public/frochess-logo.png"
+          src="./frochess-logo.png"
           alt="Logo"
           style={{ width: "60px", height: "90px" }}
         />
       </button>{" "}
       <h1>Play</h1>
-      <button onClick={() => {
-        localStorage.removeItem("position");
-        setPosition([
-          [5, 4, 3, 9, 2, 3, 4, 5],
-          [1, 1, 1, 1, 1, 1, 1, 1],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [10, 10, 10, 10, 10, 10, 10, 10],
-          [50, 40, 30, 90, 20, 30, 40, 50],
-        ]);
-      }}>
+      <button
+        onClick={() => {
+          localStorage.removeItem("position");
+          localStorage.removeItem("moveAmount");
+          setMoveAmount(0);
+          setPosition([
+            [5, 4, 3, 9, 2, 3, 4, 5],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [10, 10, 10, 10, 10, 10, 10, 10],
+            [50, 40, 30, 90, 20, 30, 40, 50],
+          ]);
+        }}
+      >
         Reset Game
       </button>
       <section>

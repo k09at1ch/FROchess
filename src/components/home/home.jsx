@@ -5,15 +5,14 @@ function Home() {
   return (
     <div>
       {" "}
-      <button onClick={() => navigate("/")}>
+      <button onClick={() => navigate("/home")}>
         <img
-          src="/public/frochess-logo.png"
+          src="./frochess-logo.png"
           alt="Logo"
           style={{ width: "60px", height: "90px" }}
         />
       </button>
       <h1>Home</h1>
-      
       <button onClick={() => navigate("/play")}>Play</button>
     </div>
   );
