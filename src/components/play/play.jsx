@@ -13,14 +13,18 @@ import whiteQueen from "../../assets/white-no-bg/queen-removebg.png";
 import whiteKing from "../../assets/white-no-bg/king-removebg.png";
 
 import { useNavigate } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 function Play() {
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [prevPosition, setPrevPosition] = useState([null, null]);
-  const [moveAmount, setMoveAmount] = useState(0);
+  const [moveAmount, setMoveAmount] = useState(() => {
+    const savedMoveAmount = localStorage.getItem("moveAmount");
+    return savedMoveAmount && savedMoveAmount!=="undefined" ? JSON.parse(savedMoveAmount) : 0;
+  });
+  const prevRowIndexRef = useRef(null);
   const prevPositionRef = useRef([null, null]);
-
+  const selectedPieceRef = useRef(null);
   const navigate = useNavigate();
 
   const [chessBoard] = useState([
@@ -34,16 +38,26 @@ function Play() {
     [0, 1, 0, 1, 0, 1, 0, 1],
   ]);
 
-  const [position, setPosition] = useState([
-    [5, 4, 3, 9, 2, 3, 4, 5],
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [10, 10, 10, 10, 10, 10, 10, 10],
-    [50, 40, 30, 90, 20, 30, 40, 50],
-  ]);
+  const [position, setPosition] = useState(() => {
+    const savedPosition = localStorage.getItem("position");
+    return savedPosition && savedPosition!=="undefined"
+      ? JSON.parse(savedPosition)
+      : [
+          [5, 4, 3, 9, 2, 3, 4, 5],
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [10, 10, 10, 10, 10, 10, 10, 10],
+          [50, 40, 30, 90, 20, 30, 40, 50],
+        ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("position", JSON.stringify(position));
+    localStorage.setItem("moveAmount", JSON.stringify(moveAmount));
+  }, [position, moveAmount]);
 
   const pieceType = (piece) => {
     const imgStyle = { width: "100%", height: "100%", objectFit: "contain" };
@@ -86,15 +100,70 @@ function Play() {
     if (piece < 10 && piece > 0) return "black";
     return null;
   };
+
   const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
     setPrevPosition([rowIndex, tileIndex]);
     prevPositionRef.current = [rowIndex, tileIndex];
-    console.log(prevPositionRef.current);
-    setSelectedPiece(null);
+
+    console.log(
+      "prevRowIndexRef.current:",
+      prevPositionRef.current,
+      "previous ROW:",
+      prevRowIndexRef.current,
+      "row",
+      rowIndex,
+      "tile",
+      tileIndex,
+      "piece",
+      currentPiece,
+    );
+    //pawn move logic 1 up
+    if (rowIndex >= 0) {
+      if (
+        prevRowIndexRef.current !== 6 &&
+        selectedPieceRef.current === 10 &&
+        prevRowIndexRef.current - rowIndex > 1
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+      if (
+        prevRowIndexRef.current !== 1 &&
+        selectedPieceRef.current === 1 &&
+        rowIndex - prevRowIndexRef.current > 1
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+    }
+    //first move check for pawn
+    if (rowIndex >= 0) {
+      if (
+        prevRowIndexRef.current === 6 &&
+        selectedPieceRef.current === 10 &&
+        prevPositionRef.current[0] < 4
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+      if (
+        prevRowIndexRef.current === 1 &&
+        selectedPieceRef.current === 1 &&
+        prevPositionRef.current[0] > 3
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+    }
+
+    prevRowIndexRef.current = rowIndex;
+
     if (currentPiece > 0) {
       setSelectedPiece(currentPiece);
+      selectedPieceRef.current = currentPiece;
     } else {
       setSelectedPiece(null);
+      selectedPieceRef.current = null;
     }
 
     if (teamCheck(selectedPiece) === teamCheck(position[rowIndex][tileIndex])) {
@@ -109,7 +178,7 @@ function Play() {
         return;
       }
     }
-
+    console.log(selectedPiece, selectedPieceRef.current);
     if (selectedPiece !== null) {
       const newPosition = position.map((row) => [...row]);
       newPosition[rowIndex][tileIndex] = selectedPiece;
@@ -129,18 +198,24 @@ function Play() {
           }
           break;
       }
+      //position[prevPositionRef.current[0]-1][prevPositionRef.current[1]] === 0 && position[prevPositionRef.current[0]-2][prevPositionRef.current[1]] === 0 && rowIndex === 4 && tileIndex === prevPositionRef.current[1]
 
-      switch (selectedPiece) {
-        case 10:
-          if (prevPositionRef.current[0] === 6) {
-            //
-          }
-      }
+      // switch (selectedPiece) {
+      //   case 10: //if pawn
+      //     if (prevPositionRef.current[0] === 6) {
+      //       console.log(rowIndex);
+      //       //if pawn is on starting position
+      //       if (position[rowIndex][tileIndex] - 2 < 4) {
+      //         return;
+      //       } //if pawn moves two squares forward
+      //     }
+      // }
 
       setPosition(newPosition);
       setSelectedPiece(null);
       setMoveAmount(moveAmount + 1);
       setPrevPosition([]);
+      selectedPieceRef.current = null;
     }
   };
 
@@ -154,6 +229,21 @@ function Play() {
         />
       </button>{" "}
       <h1>Play</h1>
+      <button onClick={() => {
+        localStorage.removeItem("position");
+        setPosition([
+          [5, 4, 3, 9, 2, 3, 4, 5],
+          [1, 1, 1, 1, 1, 1, 1, 1],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [10, 10, 10, 10, 10, 10, 10, 10],
+          [50, 40, 30, 90, 20, 30, 40, 50],
+        ]);
+      }}>
+        Reset Game
+      </button>
       <section>
         <div>
           {chessBoard.map((row, rowIndex) => (
