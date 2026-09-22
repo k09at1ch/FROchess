@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import logoImg from "/public/frochess-logo.png";
 function Home() {
   const navigate = useNavigate();
   return (
@@ -7,7 +7,7 @@ function Home() {
       {" "}
       <button onClick={() => navigate("/home")}>
         <img
-          src="./frochess-logo.png"
+          src={logoImg}
           alt="Logo"
           style={{ width: "60px", height: "90px" }}
         />

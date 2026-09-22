@@ -12,6 +12,8 @@ import whiteBishop from "../../assets/white-no-bg/bishop-no-bg.png";
 import whiteQueen from "../../assets/white-no-bg/queen-removebg.png";
 import whiteKing from "../../assets/white-no-bg/king-removebg.png";
 
+import logoImg from "/public/frochess-logo.png";
+
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
@@ -222,7 +224,7 @@ function Play() {
     <div>
       <button onClick={() => navigate("/")}>
         <img
-          src="./frochess-logo.png"
+          src={logoImg}
           alt="Logo"
           style={{ width: "60px", height: "90px" }}
         />
