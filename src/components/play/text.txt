@@ -1,0 +1,103 @@
+const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
+    const activePiece = selectedPieceRef.current;
+    setPrevPosition([rowIndex, tileIndex]);
+    prevPositionRef.current = [rowIndex, tileIndex];
+
+    console.log(
+      "1.",
+      "prevRowIndexRef.current:",
+      prevPositionRef.current,
+      "previous ROW:",
+      prevRowIndexRef.current,
+      "row",
+      rowIndex,
+      "tile",
+      tileIndex,
+      "piece",
+      currentPiece,
+    );
+    //pawn move logic 1 up
+    if (rowIndex >= 0) {
+      if (
+        prevRowIndexRef.current !== 6 &&
+        activePiece === 10 &&
+        prevRowIndexRef.current - rowIndex > 1
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+      if (
+        prevRowIndexRef.current !== 1 &&
+        activePiece === 1 &&
+        rowIndex - prevRowIndexRef.current > 1
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+    }
+    //first move check for pawn
+    if (rowIndex >= 0) {
+      if (
+        prevRowIndexRef.current === 6 &&
+        activePiece === 10 &&
+        prevPositionRef.current[0] < 4
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+      if (
+        prevRowIndexRef.current === 1 &&
+        activePiece === 1 &&
+        prevPositionRef.current[0] > 3
+      ) {
+        selectedPieceRef.current = null;
+        return;
+      }
+    }
+    //global selected row 
+    prevRowIndexRef.current = rowIndex;
+
+    if (currentPiece > 0) {
+      setSelectedPiece(currentPiece);
+      selectedPieceRef.current = currentPiece;
+    }
+
+    if (teamCheck(selectedPieceRef.current) === teamCheck(position[rowIndex][tileIndex])) {return;}
+    {
+      //player turn check------------------
+      if (moveAmount % 2 !== 0 && teamCheck(selectedPieceRef.current) === "white") {
+        return;
+      }
+      if (moveAmount % 2 === 0 && teamCheck(selectedPieceRef.current) === "black") {
+        return;
+      }
+    }
+    console.log("2.", "row", rowIndex, selectedPiece, selectedPieceRef.current);
+    if (selectedPieceRef.current !== null) {
+      const newPosition = position.map((row) => [...row]);
+      newPosition[rowIndex][tileIndex] = selectedPieceRef.current;
+      newPosition[prevPosition[0]][prevPosition[1]] = 0;
+ 
+      switch (
+        selectedPiece //queen promotion
+      ) {
+        case 1:
+          if (rowIndex === 7) {
+            newPosition[rowIndex][tileIndex] = 9;
+          }
+          break;
+        case 10:
+          if (rowIndex === 0) {
+            newPosition[rowIndex][tileIndex] = 90;
+          }
+          break;
+      }
+      
+
+      setPosition(newPosition);
+      setSelectedPiece(null);
+      setMoveAmount(moveAmount + 1);
+      setPrevPosition([]);
+      selectedPieceRef.current = null;
+    }
+  };

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import blackPawn from "../../assets/black-no-bg/nigga-pawn-removebg.png";
 import blackRook from "../../assets/black-no-bg/nigga-rook-removebg.png";
 import blackKnight from "../../assets/black-no-bg/nigga-knight-removebg.png";
@@ -26,9 +27,13 @@ function Play() {
       ? JSON.parse(savedMoveAmount)
       : 0;
   });
-  const prevRowIndexRef = useRef(null);
-  const prevPositionRef = useRef([null, null]);
-  const selectedPieceRef = useRef(null);
+  const [moveAmountArray, setMoveAmountArray] = useState(() => {
+    const savedMoveAmount = localStorage.getItem("moveAmountArray");
+    return savedMoveAmount && savedMoveAmount !== "undefined"
+      ? JSON.parse(savedMoveAmount)
+      : 0;
+  });
+
   const navigate = useNavigate();
 
   const [chessBoard] = useState([
@@ -56,11 +61,35 @@ function Play() {
           [50, 40, 30, 90, 20, 30, 40, 50],
         ];
   });
+
+  const [positionArray, setPositionArray] = useState(() => {
+    const savedPositionArray = localStorage.getItem("positionArray");
+    return savedPositionArray && savedPositionArray !== "undefined"
+      ? JSON.parse(savedPositionArray)
+      : [
+          [
+            [5, 4, 3, 9, 2, 3, 4, 5],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [10, 10, 10, 10, 10, 10, 10, 10],
+            [50, 40, 30, 90, 20, 30, 40, 50],
+          ],
+        ];
+  });
   useEffect(() => {
     localStorage.setItem("position", JSON.stringify(position));
     localStorage.setItem("moveAmount", JSON.stringify(moveAmount));
-  }, [position, moveAmount]);
-
+    localStorage.setItem("moveAmountArray", JSON.stringify(moveAmountArray));
+    localStorage.setItem("positionArray", JSON.stringify(positionArray));
+  }, [position, moveAmount, positionArray, moveAmountArray]);
+  useEffect(() => {
+    for (let i = 0; i < positionArray.length; i++) {
+      console.table(i, positionArray[i]);
+    }
+  }, [positionArray]);
   const pieceType = (piece) => {
     const imgStyle = { width: "100%", height: "100%", objectFit: "contain" };
     switch (piece) {
@@ -103,16 +132,34 @@ function Play() {
     return null;
   };
 
-  const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
-    const activePiece = selectedPieceRef.current;
-    setPrevPosition([rowIndex, tileIndex]);
-    prevPositionRef.current = [rowIndex, tileIndex];
+  const positionUpdate = (rowIndex, tileIndex) => {
+    const newPosition = position.map((row) => [...row]);
+    newPosition[rowIndex][tileIndex] = selectedPiece;
+    newPosition[prevPosition[0]][prevPosition[1]] = 0;
+    setPosition(newPosition);
 
+    setPositionArray([...positionArray, newPosition]);
+    for (let i = 0; i < positionArray.length; i++) {
+      // console.log("a")
+    }
+  };
+
+  const reset = () => {
+    setSelectedPiece(null);
+    setPrevPosition([]);
+  };
+  const moveBack = () => {};
+  const moveForward = () => {};
+  //main logic
+  const firstClick = (rowIndex, tileIndex, currentPiece) => {
+    if (currentPiece !== 0) {
+      setSelectedPiece(currentPiece);
+    }
+    setPrevPosition([rowIndex, tileIndex]);
     console.log(
-      "prevRowIndexRef.current:",
-      prevPositionRef.current,
-      "previous ROW:",
-      prevRowIndexRef.current,
+      "1.",
+      "previous pos:",
+      prevPosition,
       "row",
       rowIndex,
       "tile",
@@ -120,103 +167,60 @@ function Play() {
       "piece",
       currentPiece,
     );
-    //pawn move logic 1 up
-    if (rowIndex >= 0) {
+  };
+
+  const secondClick = (rowIndex, tileIndex, currentPiece) => {
+    console.log(
+      "2.",
+      "previous pos:",
+      prevPosition,
+      "row",
+      rowIndex,
+      "tile",
+      tileIndex,
+      "piece",
+      currentPiece,
+    );
+
+    //move order check
+    if (currentPiece !== 1488) {
       if (
-        prevRowIndexRef.current !== 6 &&
-        activePiece === 10 &&
-        prevRowIndexRef.current - rowIndex > 1
+        (moveAmount % 2 === 0 && teamCheck(selectedPiece) === "black") ||
+        (moveAmount % 2 !== 0 && teamCheck(selectedPiece) === "white")
       ) {
-        // selectedPieceRef.current = null;
+        reset();
         return;
       }
+    }
+
+    //check white or black and switch same color pieces
+    if (currentPiece !== 1488) {
       if (
-        prevRowIndexRef.current !== 1 &&
-        activePiece === 1 &&
-        rowIndex - prevRowIndexRef.current > 1
+        currentPiece > 0 &&
+        teamCheck(selectedPiece) === teamCheck(position[rowIndex][tileIndex])
       ) {
-        // selectedPieceRef.current = null;
-        return;
-      }
-    }
-    //first move check for pawn
-    if (rowIndex >= 0) {
-      if (
-        prevRowIndexRef.current === 6 &&
-        activePiece === 10 &&
-        prevPositionRef.current[0] < 4
-      ) {
-        // selectedPieceRef.current = null;
-        return;
-      }
-      if (
-        prevRowIndexRef.current === 1 &&
-        activePiece === 1 &&
-        prevPositionRef.current[0] > 3
-      ) {
-        // selectedPieceRef.current = null;
+        setSelectedPiece(currentPiece);
+        setPrevPosition([rowIndex, tileIndex]);
         return;
       }
     }
 
-    prevRowIndexRef.current = rowIndex;
+    //move logic
 
-    if (currentPiece > 0) {
-      setSelectedPiece(currentPiece);
-      selectedPieceRef.current = currentPiece;
-    }
+    positionUpdate(rowIndex, tileIndex);
 
-    if (teamCheck(selectedPiece) === teamCheck(position[rowIndex][tileIndex])) {
-      return;
-    }
-    {
-      //player turn check------------------
-      if (moveAmount % 2 !== 0 && teamCheck(selectedPiece) === "white") {
-        return;
-      }
-      if (moveAmount % 2 === 0 && teamCheck(selectedPiece) === "black") {
-        return;
-      }
-    }
-    console.log(selectedPiece, selectedPieceRef.current);
-    if (selectedPiece !== null) {
-      const newPosition = position.map((row) => [...row]);
-      newPosition[rowIndex][tileIndex] = selectedPiece;
-      newPosition[prevPosition[0]][prevPosition[1]] = 0;
+    //reset
+    reset();
+    setMoveAmount(moveAmount + 1);
+    setMoveAmountArray(moveAmountArray + 1);
+  };
 
-      switch (
-        selectedPiece //queen promotion
-      ) {
-        case 1:
-          if (rowIndex === 7) {
-            newPosition[rowIndex][tileIndex] = 9;
-          }
-          break;
-        case 10:
-          if (rowIndex === 0) {
-            newPosition[rowIndex][tileIndex] = 90;
-          }
-          break;
-      }
-      //position[prevPositionRef.current[0]-1][prevPositionRef.current[1]] === 0 && position[prevPositionRef.current[0]-2][prevPositionRef.current[1]] === 0 && rowIndex === 4 && tileIndex === prevPositionRef.current[1]
-
-      // switch (selectedPiece) {
-      //   case 10: //if pawn
-      //     if (prevPositionRef.current[0] === 6) {
-      //       console.log(rowIndex);
-      //       //if pawn is on starting position
-      //       if (position[rowIndex][tileIndex] - 2 < 4) {
-      //         return;
-      //       } //if pawn moves two squares forward
-      //     }
-      // }
-
-      setPosition(newPosition);
-      setSelectedPiece(null);
-      selectedPieceRef.current = null;
-      setMoveAmount(moveAmount + 1);
-      setPrevPosition([]);
-      selectedPieceRef.current = null;
+  //just click handle
+  const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
+    if (selectedPiece === null) {
+      firstClick(rowIndex, tileIndex, currentPiece);
+    } else {
+      secondClick(rowIndex, tileIndex, currentPiece);
     }
   };
 
@@ -230,25 +234,59 @@ function Play() {
         />
       </button>{" "}
       <h1>Play</h1>
-      <button
-        onClick={() => {
-          localStorage.removeItem("position");
-          localStorage.removeItem("moveAmount");
-          setMoveAmount(0);
-          setPosition([
-            [5, 4, 3, 9, 2, 3, 4, 5],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [10, 10, 10, 10, 10, 10, 10, 10],
-            [50, 40, 30, 90, 20, 30, 40, 50],
-          ]);
+      <ul
+        style={{
+          listStyle: "none",
+          display: "flex",
+          flexDirection: "row",
+          gap: "25px",
         }}
       >
-        Reset Game
-      </button>
+        <li>
+          <button
+            style={{ padding: "2px 15px" }}
+            onClick={() => {
+              localStorage.removeItem("position");
+              localStorage.removeItem("moveAmount");
+              setMoveAmount(0);
+              setPosition([
+                [5, 4, 3, 9, 2, 3, 4, 5],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [10, 10, 10, 10, 10, 10, 10, 10],
+                [50, 40, 30, 90, 20, 30, 40, 50],
+              ]);
+              setPositionArray([
+                [
+                  [5, 4, 3, 9, 2, 3, 4, 5],
+                  [1, 1, 1, 1, 1, 1, 1, 1],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [10, 10, 10, 10, 10, 10, 10, 10],
+                  [50, 40, 30, 90, 20, 30, 40, 50],
+                ],
+              ]);
+            }}
+          >
+            Reset Game
+          </button>
+        </li>
+        <li>
+          <button style={{ padding: "2px 15px" }} onClick={moveBack()}>
+            {"<"}
+          </button>
+        </li>
+        <li>
+          <button style={{ padding: "2px 15px" }} onClick={moveForward()}>
+            {">"}
+          </button>
+        </li>
+      </ul>
       <section>
         <div>
           {chessBoard.map((row, rowIndex) => (
