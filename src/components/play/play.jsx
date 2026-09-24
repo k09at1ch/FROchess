@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 /* eslint-disable no-unused-vars */
 import blackPawn from "../../assets/black-no-bg/nigga-pawn-removebg.png";
 import blackRook from "../../assets/black-no-bg/nigga-rook-removebg.png";
@@ -85,17 +86,16 @@ function Play() {
     localStorage.setItem("moveAmountArray", JSON.stringify(moveAmountArray));
     localStorage.setItem("positionArray", JSON.stringify(positionArray));
   }, [position, moveAmount, positionArray, moveAmountArray]);
-  useEffect(() => {
-    for (let i = 0; i < positionArray.length; i++) {
-      console.table(i, positionArray[i]);
-    }
-  }, [positionArray]);
+  // useEffect(() => {
+  //   for (let i = 0; i < positionArray.length; i++) {
+  //     console.table(i, positionArray[i]);
+  //   }
+  // }, [positionArray]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPosition(positionArray[positionArray.length - 1]);
-    setMoveAmountArray(moveAmount)
-    console.log("niga");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setMoveAmountArray(moveAmount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isDisabledButtonForArrowRight = moveAmount === moveAmountArray;
@@ -141,7 +141,6 @@ function Play() {
     if (piece < 10 && piece > 0) return "black";
     return null;
   };
-  //upd later
   const positionUpdate = (rowIndex, tileIndex) => {
     const newPosition = position.map((row) => [...row]);
     newPosition[rowIndex][tileIndex] = selectedPiece;
@@ -149,9 +148,6 @@ function Play() {
     setPosition(newPosition);
 
     setPositionArray([...positionArray, newPosition]);
-    for (let i = 0; i < positionArray.length; i++) {
-      // console.log("a")
-    }
   };
 
   const reset = () => {
@@ -162,37 +158,24 @@ function Play() {
   const moveBack = () => {
     setPosition(positionArray[moveAmountArray - 1]);
     setMoveAmountArray(moveAmountArray - 1);
-
-    console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
   };
   const moveForward = () => {
     setPosition(positionArray[moveAmountArray + 1]);
     setMoveAmountArray(moveAmountArray + 1);
-
-    console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
   };
   //main logic
   const firstClick = (rowIndex, tileIndex, currentPiece) => {
+    console.log("piece:", currentPiece);
     if (currentPiece !== 0) {
       setSelectedPiece(currentPiece);
     }
     setPrevPosition([rowIndex, tileIndex]);
-    console.log(
-      "1.",
-      "previous pos:",
-      prevPosition,
-      "row",
-      rowIndex,
-      "tile",
-      tileIndex,
-      "piece",
-      currentPiece,
-    );
   };
 
   const secondClick = (rowIndex, tileIndex, currentPiece) => {
     console.log(
-      "2.",
+      "curremtPiece:",
+      selectedPiece,
       "previous pos:",
       prevPosition,
       "row",
@@ -227,6 +210,50 @@ function Play() {
     }
 
     //move logic
+
+    //white
+    //pawn
+    if (selectedPiece === 10) {
+      if (prevPosition[0] < rowIndex) {
+        console.log("niggus");
+        return
+      }
+    }
+    //rook
+    if (selectedPiece === 50) {
+    }
+    //knight
+    if (selectedPiece === 40) {
+    }
+    //bishop
+    if (selectedPiece === 30) {
+    }
+    //queen
+    if (selectedPiece === 90) {
+    }
+    //king
+    if (selectedPiece === 20) {
+    }
+
+    //black
+    //pawn
+    if (selectedPiece === 1) {
+    }
+    //rook
+    if (selectedPiece === 5) {
+    }
+    //knight
+    if (selectedPiece === 4) {
+    }
+    //bishop
+    if (selectedPiece === 3) {
+    }
+    //queen
+    if (selectedPiece === 9) {
+    }
+    //king
+    if (selectedPiece === 2) {
+    }
 
     positionUpdate(rowIndex, tileIndex);
 
