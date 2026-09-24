@@ -16,7 +16,7 @@ import whiteKing from "../../assets/white-no-bg/king-removebg.png";
 import logoImg from "/public/frochess-logo.png";
 
 import { useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 function Play() {
   const [selectedPiece, setSelectedPiece] = useState(null);
@@ -31,7 +31,7 @@ function Play() {
     const savedMoveAmount = localStorage.getItem("moveAmountArray");
     return savedMoveAmount && savedMoveAmount !== "undefined"
       ? JSON.parse(savedMoveAmount)
-      : 0;
+      : 1;
   });
 
   const navigate = useNavigate();
@@ -90,6 +90,16 @@ function Play() {
       console.table(i, positionArray[i]);
     }
   }, [positionArray]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPosition(positionArray[positionArray.length - 1]);
+    setMoveAmountArray(moveAmount)
+    console.log("niga");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isDisabledButtonForArrowRight = moveAmount === moveAmountArray;
+  const isDisabledButtonForArrowLeft = moveAmount < 1 || moveAmountArray < 1;
   const pieceType = (piece) => {
     const imgStyle = { width: "100%", height: "100%", objectFit: "contain" };
     switch (piece) {
@@ -131,7 +141,7 @@ function Play() {
     if (piece < 10 && piece > 0) return "black";
     return null;
   };
-
+  //upd later
   const positionUpdate = (rowIndex, tileIndex) => {
     const newPosition = position.map((row) => [...row]);
     newPosition[rowIndex][tileIndex] = selectedPiece;
@@ -148,8 +158,19 @@ function Play() {
     setSelectedPiece(null);
     setPrevPosition([]);
   };
-  const moveBack = () => {};
-  const moveForward = () => {};
+
+  const moveBack = () => {
+    setPosition(positionArray[moveAmountArray - 1]);
+    setMoveAmountArray(moveAmountArray - 1);
+
+    console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
+  };
+  const moveForward = () => {
+    setPosition(positionArray[moveAmountArray + 1]);
+    setMoveAmountArray(moveAmountArray + 1);
+
+    console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
+  };
   //main logic
   const firstClick = (rowIndex, tileIndex, currentPiece) => {
     if (currentPiece !== 0) {
@@ -217,6 +238,10 @@ function Play() {
 
   //just click handle
   const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
+    console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
+    if (moveAmountArray !== positionArray.length - 1) {
+      return;
+    }
     if (selectedPiece === null) {
       firstClick(rowIndex, tileIndex, currentPiece);
     } else {
@@ -248,7 +273,9 @@ function Play() {
             onClick={() => {
               localStorage.removeItem("position");
               localStorage.removeItem("moveAmount");
+              localStorage.removeItem("moveAmountArray");
               setMoveAmount(0);
+              setMoveAmountArray(0);
               setPosition([
                 [5, 4, 3, 9, 2, 3, 4, 5],
                 [1, 1, 1, 1, 1, 1, 1, 1],
@@ -277,12 +304,20 @@ function Play() {
           </button>
         </li>
         <li>
-          <button style={{ padding: "2px 15px" }} onClick={moveBack()}>
+          <button
+            style={{ padding: "2px 15px" }}
+            disabled={isDisabledButtonForArrowLeft}
+            onClick={moveBack}
+          >
             {"<"}
           </button>
         </li>
         <li>
-          <button style={{ padding: "2px 15px" }} onClick={moveForward()}>
+          <button
+            style={{ padding: "2px 15px" }}
+            disabled={isDisabledButtonForArrowRight}
+            onClick={moveForward}
+          >
             {">"}
           </button>
         </li>
@@ -292,7 +327,9 @@ function Play() {
           {chessBoard.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: "flex" }}>
               {row.map((tile, tileIndex) => {
+                let i = 0;
                 const currentPiece = position[rowIndex][tileIndex];
+
                 return (
                   <button
                     key={tileIndex}
