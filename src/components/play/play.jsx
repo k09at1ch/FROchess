@@ -1,3 +1,5 @@
+/* eslint-disable no-constant-binary-expression */
+/* eslint-disable no-constant-condition */
 /* eslint-disable no-empty */
 /* eslint-disable no-unused-vars */
 import blackPawn from "../../assets/black-no-bg/nigga-pawn-removebg.png";
@@ -54,12 +56,12 @@ function Play() {
       : [
           [5, 4, 3, 9, 2, 3, 4, 5],
           [1, 1, 1, 1, 1, 1, 1, 1],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0, 0, 0],
-          [10, 10, 10, 10, 10, 10, 10, 10],
-          [50, 40, 30, 90, 20, 30, 40, 50],
+          [0, 0, 30, 0, 0, 50, 0, 0],
+          [40, 0, 0, 0, 0, 40, 0, 0],
+          [0, 0, 0, 0, 30, 0, 0, 0],
+          [0, 90, 50, 0, 0, 0, 20, 0],
+          [0, 0, 10, 10, 0, 10, 0, 10],
+          [0, 0, 0, 0, 90, 0, 0, 0],
         ];
   });
 
@@ -80,17 +82,21 @@ function Play() {
           ],
         ];
   });
+  //move and position updte local storage
   useEffect(() => {
     localStorage.setItem("position", JSON.stringify(position));
     localStorage.setItem("moveAmount", JSON.stringify(moveAmount));
     localStorage.setItem("moveAmountArray", JSON.stringify(moveAmountArray));
     localStorage.setItem("positionArray", JSON.stringify(positionArray));
   }, [position, moveAmount, positionArray, moveAmountArray]);
+  //position history log
   // useEffect(() => {
   //   for (let i = 0; i < positionArray.length; i++) {
   //     console.table(i, positionArray[i]);
   //   }
   // }, [positionArray]);
+
+  //position upd after reload
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPosition(positionArray[positionArray.length - 1]);
@@ -100,6 +106,7 @@ function Play() {
 
   const isDisabledButtonForArrowRight = moveAmount === moveAmountArray;
   const isDisabledButtonForArrowLeft = moveAmount < 1 || moveAmountArray < 1;
+  //piece drawing
   const pieceType = (piece) => {
     const imgStyle = { width: "100%", height: "100%", objectFit: "contain" };
     switch (piece) {
@@ -137,9 +144,14 @@ function Play() {
   };
 
   const teamCheck = (piece) => {
-    if (piece > 9) return "white";
-    if (piece < 10 && piece > 0) return "black";
-    return null;
+    if (piece > 9) {
+      return "white";
+    }
+    if (piece < 10 && piece > 0) {
+      return "black";
+    } else {
+      return null;
+    }
   };
   const positionUpdate = (rowIndex, tileIndex) => {
     const newPosition = position.map((row) => [...row]);
@@ -214,19 +226,201 @@ function Play() {
     //white
     //pawn
     if (selectedPiece === 10) {
+      //move back
       if (prevPosition[0] < rowIndex) {
-        console.log("niggus");
-        return
+        return;
+      }
+      //start pos
+      if (prevPosition[0] - rowIndex > 2 && prevPosition[0] === 6) {
+        return;
+      }
+      //move up
+      if (prevPosition[0] - rowIndex > 1 && prevPosition[0] !== 6) {
+        return;
+      }
+      if (
+        (prevPosition[0] - rowIndex === 1 &&
+          prevPosition[1] === tileIndex &&
+          teamCheck(position[rowIndex][tileIndex]) === "black") ||
+        teamCheck(position[rowIndex][tileIndex]) === "white"
+      ) {
+        return;
+      }
+      //capture diagonally
+      if (
+        prevPosition[1] !== tileIndex &&
+        teamCheck(position[rowIndex][tileIndex]) !== "black"
+      ) {
+        return;
+      }
+      //up capture fix
+      if (
+        teamCheck(position[rowIndex][tileIndex]) === "black" &&
+        prevPosition[1] === tileIndex
+      ) {
+        return;
+      }
+      //queen logic
+      if (rowIndex === 3) {
+        console.log("quenn promotion square");
+
+        // return;
       }
     }
     //rook
+    const isPieceOnPathRook = () => {
+      if (prevPosition[0] > rowIndex && prevPosition[1] === tileIndex) {
+        console.log("condition 1");
+        for (let i = prevPosition[0] - 1; i > rowIndex; i--) {
+          console.log("piece on path", i);
+          if (position[i][tileIndex] !== 0) {
+            return true;
+          }
+        }
+      }
+      if (prevPosition[0] < rowIndex && prevPosition[1] === tileIndex) {
+        console.log("condition 2");
+        for (let i = prevPosition[0] + 1; i < rowIndex; i++) {
+          console.log("niga 1 1 1 ", i);
+          if (position[i][tileIndex] !== 0) {
+            return true;
+          }
+        }
+      }
+
+      if (prevPosition[1] > tileIndex && prevPosition[0] === rowIndex) {
+        console.log("condition 3");
+        for (let i = prevPosition[1] - 1; i > tileIndex; i--) {
+          console.log("piece on path", i);
+          if (position[rowIndex][i] !== 0) {
+            return true;
+          }
+        }
+      }
+      if (prevPosition[1] < tileIndex && prevPosition[0] === rowIndex) {
+        console.log("condition 4");
+        for (let i = prevPosition[1] + 1; i < tileIndex; i++) {
+          console.log("piece on path", i);
+          if (position[rowIndex][i] !== 0) {
+            return true;
+          }
+        }
+      }
+    };
     if (selectedPiece === 50) {
+      console.log("white rook moving");
+      if (isPieceOnPathRook()) {
+        return;
+      }
+      //use same logic for bishop but inverted
+      if (prevPosition[0] !== rowIndex && prevPosition[1] !== tileIndex) {
+        return;
+      }
     }
     //knight
     if (selectedPiece === 40) {
     }
     //bishop
+    const checkLegalMoveBishop = () => {
+      if (prevPosition[0] - rowIndex === prevPosition[1] - tileIndex) {
+        console.log("checklegalmovebishop");
+        return true;
+      } else if (
+        prevPosition[0] - rowIndex ===
+        (prevPosition[1] - tileIndex) * -1
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+    const isPieceOnPathBishop = () => {
+      if (rowIndex < prevPosition[0] && tileIndex < prevPosition[1]) {
+        console.log("condition 1");
+        for (
+          let i = prevPosition[0] - 1, g = prevPosition[1] - 1;
+          i > rowIndex && g > tileIndex;
+          i--, g--
+        ) {
+          console.log("piece on path condition 1", i, g);
+          console.log(position[i][g]);
+          if (position[i][g] !== 0) {
+            console.log("ezzz");
+            return true;
+          }
+        }
+      }
+      if (rowIndex < prevPosition[0] && tileIndex > prevPosition[1]) {
+        console.log("condition 2");
+        for (
+          let i = prevPosition[0] - 1, g = prevPosition[1] + 1;
+          i > rowIndex && g < tileIndex;
+          i--, g++
+        ) {
+          console.log("piece on path condition 1", i, g);
+          console.log(position[i][g]);
+          if (position[i][g] !== 0) {
+            console.log("ezzz");
+            return true;
+          }
+        }
+      }
+      if (rowIndex > prevPosition[0] && tileIndex < prevPosition[1]) {
+        console.log("condition 3");
+        for (
+          let i = prevPosition[0] + 1, g = prevPosition[1] - 1;
+          i < rowIndex && g > tileIndex;
+          i++, g--
+        ) {
+          console.log("piece on path condition 1", i, g);
+          console.log(position[i][g]);
+          if (position[i][g] !== 0) {
+            console.log("ezzz");
+            return true;
+          }
+        }
+      }
+      if (rowIndex > prevPosition[0] && tileIndex > prevPosition[1]) {
+        console.log("condition 4");
+        for (
+          let i = prevPosition[0] + 1, g = prevPosition[1] + 1;
+          i < rowIndex && g < tileIndex;
+          i++, g++
+        ) {
+          console.log("piece on path condition 1", i, g);
+          console.log(position[i][g]);
+          if (position[i][g] !== 0) {
+            console.log("ezzz");
+            return true;
+          }
+        }
+      }
+      return false;
+    };
     if (selectedPiece === 30) {
+      console.log("bishop moving");
+      if (isPieceOnPathBishop()) {
+        return;
+      }
+      //case - -, - +, + -, + +
+
+      if (!checkLegalMoveBishop()) {
+        console.log(
+          "prevpos",
+          prevPosition[0],
+          prevPosition[1],
+          "row",
+          rowIndex,
+          "tileINdex",
+          tileIndex,
+        );
+        return;
+      }
+      //|| prevPosition[0]-rowIndex!==(prevPosition[1]-tileIndex)*-1
+
+      if (prevPosition[0] === rowIndex && prevPosition[1] === tileIndex) {
+        return;
+      }
     }
     //queen
     if (selectedPiece === 90) {
@@ -265,6 +459,7 @@ function Play() {
 
   //just click handle
   const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
+    console.log("TEMA", teamCheck(position[rowIndex][tileIndex]));
     console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
     if (moveAmountArray !== positionArray.length - 1) {
       return;
@@ -306,23 +501,23 @@ function Play() {
               setPosition([
                 [5, 4, 3, 9, 2, 3, 4, 5],
                 [1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [10, 10, 10, 10, 10, 10, 10, 10],
-                [50, 40, 30, 90, 20, 30, 40, 50],
+                [0, 0, 30, 0, 0, 50, 0, 0],
+                [40, 0, 0, 0, 0, 40, 0, 0],
+                [0, 0, 0, 0, 30, 0, 0, 0],
+                [0, 90, 50, 0, 0, 0, 20, 0],
+                [0, 0, 10, 10, 0, 10, 0, 10],
+                [0, 0, 0, 0, 90, 0, 0, 0],
               ]);
               setPositionArray([
                 [
                   [5, 4, 3, 9, 2, 3, 4, 5],
                   [1, 1, 1, 1, 1, 1, 1, 1],
-                  [0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0],
-                  [10, 10, 10, 10, 10, 10, 10, 10],
-                  [50, 40, 30, 90, 20, 30, 40, 50],
+                  [0, 0, 30, 0, 0, 50, 0, 0],
+                  [40, 0, 0, 0, 0, 40, 0, 0],
+                  [0, 0, 0, 0, 30, 0, 0, 0],
+                  [0, 90, 50, 0, 0, 0, 20, 0],
+                  [0, 0, 10, 10, 0, 10, 0, 10],
+                  [0, 0, 0, 0, 90, 0, 0, 0],
                 ],
               ]);
             }}
@@ -354,9 +549,7 @@ function Play() {
           {chessBoard.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: "flex" }}>
               {row.map((tile, tileIndex) => {
-                let i = 0;
                 const currentPiece = position[rowIndex][tileIndex];
-
                 return (
                   <button
                     key={tileIndex}
