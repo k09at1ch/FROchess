@@ -54,14 +54,14 @@ function Play() {
     return savedPosition && savedPosition !== "undefined"
       ? JSON.parse(savedPosition)
       : [
-          [5, 4, 3, 9, 2, 3, 4, 5],
-          [1, 1, 1, 1, 1, 1, 1, 1],
-          [0, 0, 30, 0, 0, 50, 0, 0],
-          [40, 0, 0, 0, 0, 40, 0, 0],
-          [0, 0, 0, 0, 30, 0, 0, 0],
-          [0, 90, 50, 0, 0, 0, 20, 0],
-          [0, 0, 10, 10, 0, 10, 0, 10],
-          [0, 0, 0, 0, 90, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 5],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 40, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 4, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
         ];
   });
 
@@ -82,6 +82,158 @@ function Play() {
           ],
         ];
   });
+  const [attackedPositionWhite, setAttackedPositionWhite] = useState(() => {
+    return [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+  });
+  const [attackedPositionBlack, setAttackedPositionBlack] = useState(() => {
+    return [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+  });
+  const checkCheckBlack = () => {
+    const newAttackPosition = attackedPositionBlack.map((row) => [...row]);
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        const pieceType = position[x][y];
+        if (pieceType === 5) {
+          for (let i = x + 1; i < 8; i++) {
+            newAttackPosition[i][y] = 5;
+            if (position[i][y] !== 0) break;
+          }
+          for (let i = x - 1; i >= 0; i--) {
+            newAttackPosition[i][y] = 5;
+            if (position[i][y] !== 0) break;
+          }
+          for (let j = y + 1; j < 8; j++) {
+            newAttackPosition[x][j] = 5;
+            if (position[x][j] !== 0) break;
+          }
+          for (let j = y - 1; j >= 0; j--) {
+            newAttackPosition[x][j] = 5;
+            if (position[x][j] !== 0) break;
+          }
+        }
+        if (pieceType === 1) {
+          newAttackPosition[x + 1][y - 1] = 1;
+          newAttackPosition[x + 1][y + 1] = 1;
+        }
+        if (pieceType === 3) {
+          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
+            newAttackPosition[i][g] = 3;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
+            newAttackPosition[i][g] = 3;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
+            newAttackPosition[i][g] = 3;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
+            newAttackPosition[i][g] = 3;
+            if (position[i][g] !== 0) break;
+          }
+        }
+        if (pieceType === 4) {
+          newAttackPosition[x+2][y+1]=4
+          newAttackPosition[x+2][y-1]=4
+          newAttackPosition[x-2][y+1]=4
+          newAttackPosition[x-2][y-1]=4
+
+          newAttackPosition[x+1][y+2]=4
+          newAttackPosition[x-1][y+2]=4
+          newAttackPosition[x+1][y-2]=4
+          newAttackPosition[x-1][y-2]=4
+        }
+        if (newAttackPosition[x].length > 8) {
+          newAttackPosition[x].pop();
+        }
+      }
+    }
+    setAttackedPositionBlack(newAttackPosition);
+  };
+  //CHECK LOGIC(the most complicated thing)
+  const checkCheckWhite = () => {
+    const newAttackPosition = attackedPositionWhite.map((row) => [...row]);
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        // console.log("piece:", position[x][y], "x", x, "y", y);
+        const pieceType = position[x][y];
+        if (pieceType === 10) {
+          newAttackPosition[x - 1][y - 1] = 10;
+          newAttackPosition[x - 1][y + 1] = 10;
+        }
+        if (pieceType === 50) {
+          for (let i = x + 1; i < 8; i++) {
+            newAttackPosition[i][y] = 50;
+            if (position[i][y] !== 0) break;
+          }
+          for (let i = x - 1; i >= 0; i--) {
+            newAttackPosition[i][y] = 50;
+            if (position[i][y] !== 0) break;
+          }
+          for (let j = y + 1; j < 8; j++) {
+            newAttackPosition[x][j] = 50;
+            if (position[x][j] !== 0) break;
+          }
+          for (let j = y - 1; j >= 0; j--) {
+            newAttackPosition[x][j] = 50;
+            if (position[x][j] !== 0) break;
+          }
+        }
+        if (pieceType === 30) {
+          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
+            newAttackPosition[i][g] = 30;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
+            newAttackPosition[i][g] = 30;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
+            newAttackPosition[i][g] = 30;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
+            newAttackPosition[i][g] = 30;
+            if (position[i][g] !== 0) break;
+          }
+        }
+        if(pieceType===40){
+          newAttackPosition[x+2][y+1]=40
+          newAttackPosition[x+2][y-1]=40
+          newAttackPosition[x-2][y+1]=40
+          newAttackPosition[x-2][y-1]=40
+
+          newAttackPosition[x+1][y+2]=40
+          newAttackPosition[x-1][y+2]=40
+          newAttackPosition[x+1][y-2]=40
+          newAttackPosition[x-1][y-2]=40
+        }
+        if (newAttackPosition[x].length > 8) {
+          newAttackPosition[x].pop();
+        }
+      }
+    }
+    setAttackedPositionWhite(newAttackPosition);
+  };
   //move and position updte local storage
   useEffect(() => {
     localStorage.setItem("position", JSON.stringify(position));
@@ -96,11 +248,13 @@ function Play() {
   //   }
   // }, [positionArray]);
 
-  //position upd after reload
+  // {position upd after reload}
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPosition(positionArray[positionArray.length - 1]);
     setMoveAmountArray(moveAmount);
+    checkCheckWhite();
+    checkCheckBlack();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -142,7 +296,6 @@ function Play() {
         return null;
     }
   };
-
   const teamCheck = (piece) => {
     if (piece > 9) {
       return "white";
@@ -161,12 +314,10 @@ function Play() {
 
     setPositionArray([...positionArray, newPosition]);
   };
-
   const reset = () => {
     setSelectedPiece(null);
     setPrevPosition([]);
   };
-
   const moveBack = () => {
     setPosition(positionArray[moveAmountArray - 1]);
     setMoveAmountArray(moveAmountArray - 1);
@@ -183,7 +334,6 @@ function Play() {
     }
     setPrevPosition([rowIndex, tileIndex]);
   };
-
   const secondClick = (rowIndex, tileIndex, currentPiece) => {
     console.log(
       "curremtPiece:",
@@ -223,19 +373,21 @@ function Play() {
 
     //move logic
 
-    //white
-    //pawn
+    //white pawn
     if (selectedPiece === 10) {
       //move back
       if (prevPosition[0] < rowIndex) {
+        reset();
         return;
       }
       //start pos
       if (prevPosition[0] - rowIndex > 2 && prevPosition[0] === 6) {
+        reset();
         return;
       }
       //move up
       if (prevPosition[0] - rowIndex > 1 && prevPosition[0] !== 6) {
+        reset();
         return;
       }
       if (
@@ -244,6 +396,14 @@ function Play() {
           teamCheck(position[rowIndex][tileIndex]) === "black") ||
         teamCheck(position[rowIndex][tileIndex]) === "white"
       ) {
+        reset();
+        return;
+      }
+      if (
+        prevPosition[0] - rowIndex === 2 &&
+        position[rowIndex + 1][tileIndex] !== 0
+      ) {
+        reset();
         return;
       }
       //capture diagonally
@@ -251,6 +411,7 @@ function Play() {
         prevPosition[1] !== tileIndex &&
         teamCheck(position[rowIndex][tileIndex]) !== "black"
       ) {
+        reset();
         return;
       }
       //up capture fix
@@ -258,30 +419,25 @@ function Play() {
         teamCheck(position[rowIndex][tileIndex]) === "black" &&
         prevPosition[1] === tileIndex
       ) {
+        reset();
         return;
       }
       //queen logic
       if (rowIndex === 3) {
-        console.log("quenn promotion square");
-
         // return;
       }
     }
     //rook
     const isPieceOnPathRook = () => {
       if (prevPosition[0] > rowIndex && prevPosition[1] === tileIndex) {
-        console.log("condition 1");
         for (let i = prevPosition[0] - 1; i > rowIndex; i--) {
-          console.log("piece on path", i);
           if (position[i][tileIndex] !== 0) {
             return true;
           }
         }
       }
       if (prevPosition[0] < rowIndex && prevPosition[1] === tileIndex) {
-        console.log("condition 2");
         for (let i = prevPosition[0] + 1; i < rowIndex; i++) {
-          console.log("niga 1 1 1 ", i);
           if (position[i][tileIndex] !== 0) {
             return true;
           }
@@ -289,41 +445,88 @@ function Play() {
       }
 
       if (prevPosition[1] > tileIndex && prevPosition[0] === rowIndex) {
-        console.log("condition 3");
         for (let i = prevPosition[1] - 1; i > tileIndex; i--) {
-          console.log("piece on path", i);
           if (position[rowIndex][i] !== 0) {
             return true;
           }
         }
       }
       if (prevPosition[1] < tileIndex && prevPosition[0] === rowIndex) {
-        console.log("condition 4");
         for (let i = prevPosition[1] + 1; i < tileIndex; i++) {
-          console.log("piece on path", i);
           if (position[rowIndex][i] !== 0) {
             return true;
           }
         }
       }
     };
-    if (selectedPiece === 50) {
-      console.log("white rook moving");
+    if (selectedPiece === 50 || selectedPiece === 5) {
       if (isPieceOnPathRook()) {
+        reset();
         return;
       }
       //use same logic for bishop but inverted
       if (prevPosition[0] !== rowIndex && prevPosition[1] !== tileIndex) {
+        reset();
         return;
       }
     }
+
     //knight
-    if (selectedPiece === 40) {
+    const checkLegalMoveKnight = () => {
+      if (
+        prevPosition[0] === rowIndex - 2 &&
+        prevPosition[1] === tileIndex - 1
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex - 2 &&
+        prevPosition[1] === tileIndex + 1
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex - 1 &&
+        prevPosition[1] === tileIndex + 2
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex + 1 &&
+        prevPosition[1] === tileIndex + 2
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex + 2 &&
+        prevPosition[1] === tileIndex - 1
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex + 2 &&
+        prevPosition[1] === tileIndex + 1
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex - 1 &&
+        prevPosition[1] === tileIndex - 2
+      ) {
+        return true;
+      } else if (
+        prevPosition[0] === rowIndex + 1 &&
+        prevPosition[1] === tileIndex - 2
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+    if (selectedPiece === 40 || selectedPiece === 4) {
+      if (!checkLegalMoveKnight()) {
+        reset();
+        return;
+      }
     }
+
     //bishop
     const checkLegalMoveBishop = () => {
       if (prevPosition[0] - rowIndex === prevPosition[1] - tileIndex) {
-        console.log("checklegalmovebishop");
         return true;
       } else if (
         prevPosition[0] - rowIndex ===
@@ -336,117 +539,171 @@ function Play() {
     };
     const isPieceOnPathBishop = () => {
       if (rowIndex < prevPosition[0] && tileIndex < prevPosition[1]) {
-        console.log("condition 1");
         for (
           let i = prevPosition[0] - 1, g = prevPosition[1] - 1;
           i > rowIndex && g > tileIndex;
           i--, g--
         ) {
-          console.log("piece on path condition 1", i, g);
-          console.log(position[i][g]);
           if (position[i][g] !== 0) {
-            console.log("ezzz");
             return true;
           }
         }
       }
       if (rowIndex < prevPosition[0] && tileIndex > prevPosition[1]) {
-        console.log("condition 2");
         for (
           let i = prevPosition[0] - 1, g = prevPosition[1] + 1;
           i > rowIndex && g < tileIndex;
           i--, g++
         ) {
-          console.log("piece on path condition 1", i, g);
-          console.log(position[i][g]);
           if (position[i][g] !== 0) {
-            console.log("ezzz");
             return true;
           }
         }
       }
       if (rowIndex > prevPosition[0] && tileIndex < prevPosition[1]) {
-        console.log("condition 3");
         for (
           let i = prevPosition[0] + 1, g = prevPosition[1] - 1;
           i < rowIndex && g > tileIndex;
           i++, g--
         ) {
-          console.log("piece on path condition 1", i, g);
-          console.log(position[i][g]);
           if (position[i][g] !== 0) {
-            console.log("ezzz");
             return true;
           }
         }
       }
       if (rowIndex > prevPosition[0] && tileIndex > prevPosition[1]) {
-        console.log("condition 4");
         for (
           let i = prevPosition[0] + 1, g = prevPosition[1] + 1;
           i < rowIndex && g < tileIndex;
           i++, g++
         ) {
-          console.log("piece on path condition 1", i, g);
-          console.log(position[i][g]);
           if (position[i][g] !== 0) {
-            console.log("ezzz");
             return true;
           }
         }
       }
       return false;
     };
-    if (selectedPiece === 30) {
-      console.log("bishop moving");
+    if (selectedPiece === 30 || selectedPiece === 3) {
       if (isPieceOnPathBishop()) {
+        reset();
         return;
       }
       //case - -, - +, + -, + +
 
       if (!checkLegalMoveBishop()) {
-        console.log(
-          "prevpos",
-          prevPosition[0],
-          prevPosition[1],
-          "row",
-          rowIndex,
-          "tileINdex",
-          tileIndex,
-        );
+        reset();
         return;
       }
       //|| prevPosition[0]-rowIndex!==(prevPosition[1]-tileIndex)*-1
-
-      if (prevPosition[0] === rowIndex && prevPosition[1] === tileIndex) {
+    }
+    //queen
+    const checkLegalMoveQueen = () => {
+      // (prevPosition[0] !== rowIndex && prevPosition[1] !== tileIndex) || !checkLegalMoveBishop()
+      if (
+        (prevPosition[0] !== rowIndex && prevPosition[1] === tileIndex) ||
+        (prevPosition[0] === rowIndex && prevPosition[1] !== tileIndex)
+      ) {
+        return true;
+      } else if (checkLegalMoveBishop()) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+    if (selectedPiece === 90 || selectedPiece === 9) {
+      if (isPieceOnPathRook() || isPieceOnPathBishop()) {
+        reset();
+        return;
+      }
+      //use same logic for bishop but inverted
+      if (!checkLegalMoveQueen()) {
+        reset();
         return;
       }
     }
-    //queen
-    if (selectedPiece === 90) {
-    }
     //king
-    if (selectedPiece === 20) {
+    const checkLegalMoveKing = () => {
+      if (
+        (prevPosition[0] === rowIndex - 1 &&
+          prevPosition[1] === tileIndex - 1) || //22
+        (prevPosition[0] === rowIndex - 1 && prevPosition[1] === tileIndex) || //21
+        (prevPosition[0] === rowIndex - 1 &&
+          prevPosition[1] === tileIndex + 1) || //20
+        (prevPosition[0] === rowIndex && prevPosition[1] === tileIndex - 1) || //10
+        (prevPosition[0] === rowIndex + 1 &&
+          prevPosition[1] === tileIndex + 1) || //00
+        (prevPosition[0] === rowIndex + 1 && prevPosition[1] === tileIndex) || //01
+        (prevPosition[0] === rowIndex + 1 &&
+          prevPosition[1] === tileIndex - 1) || //02
+        (prevPosition[0] === rowIndex && prevPosition[1] === tileIndex + 1) //11
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+    if (selectedPiece === 20 || selectedPiece === 2) {
+      if (!checkLegalMoveKing()) {
+        reset();
+        return;
+      }
     }
 
-    //black
-    //pawn
+    //black pawn
     if (selectedPiece === 1) {
-    }
-    //rook
-    if (selectedPiece === 5) {
-    }
-    //knight
-    if (selectedPiece === 4) {
-    }
-    //bishop
-    if (selectedPiece === 3) {
-    }
-    //queen
-    if (selectedPiece === 9) {
-    }
-    //king
-    if (selectedPiece === 2) {
+      //move back
+      if (prevPosition[0] > rowIndex) {
+        reset();
+        return;
+      }
+      //start pos
+      if (rowIndex - prevPosition[0] > 2 && prevPosition[0] === 1) {
+        reset();
+        return;
+      }
+      if (
+        rowIndex - prevPosition[0] === 2 &&
+        position[rowIndex - 1][tileIndex] !== 0
+      ) {
+        reset();
+        return;
+      }
+
+      //move up
+      if (rowIndex - prevPosition[0] > 1 && prevPosition[0] !== 1) {
+        reset();
+        return;
+      }
+      if (
+        (rowIndex - prevPosition[0] === 1 &&
+          prevPosition[1] === tileIndex &&
+          teamCheck(position[rowIndex][tileIndex]) === "white") ||
+        teamCheck(position[rowIndex][tileIndex]) === "black"
+      ) {
+        reset();
+        return;
+      }
+      //capture diagonally
+      if (
+        prevPosition[1] !== tileIndex &&
+        teamCheck(position[rowIndex][tileIndex]) !== "white"
+      ) {
+        reset();
+        return;
+      }
+      //up capture fix
+      if (
+        teamCheck(position[rowIndex][tileIndex]) === "white" &&
+        prevPosition[1] === tileIndex
+      ) {
+        reset();
+        return;
+      }
+      //queen logic
+      if (rowIndex === 7) {
+        // return;
+      }
     }
 
     positionUpdate(rowIndex, tileIndex);
@@ -456,7 +713,6 @@ function Play() {
     setMoveAmount(moveAmount + 1);
     setMoveAmountArray(moveAmountArray + 1);
   };
-
   //just click handle
   const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
     console.log("TEMA", teamCheck(position[rowIndex][tileIndex]));
@@ -470,7 +726,6 @@ function Play() {
       secondClick(rowIndex, tileIndex, currentPiece);
     }
   };
-
   return (
     <div>
       <button onClick={() => navigate("/")}>
@@ -499,25 +754,25 @@ function Play() {
               setMoveAmount(0);
               setMoveAmountArray(0);
               setPosition([
-                [5, 4, 3, 9, 2, 3, 4, 5],
-                [1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 30, 0, 0, 50, 0, 0],
-                [40, 0, 0, 0, 0, 40, 0, 0],
-                [0, 0, 0, 0, 30, 0, 0, 0],
-                [0, 90, 50, 0, 0, 0, 20, 0],
-                [0, 0, 10, 10, 0, 10, 0, 10],
-                [0, 0, 0, 0, 90, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 5],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 40, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 4, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
               ]);
               setPositionArray([
                 [
-                  [5, 4, 3, 9, 2, 3, 4, 5],
-                  [1, 1, 1, 1, 1, 1, 1, 1],
-                  [0, 0, 30, 0, 0, 50, 0, 0],
-                  [40, 0, 0, 0, 0, 40, 0, 0],
-                  [0, 0, 0, 0, 30, 0, 0, 0],
-                  [0, 90, 50, 0, 0, 0, 20, 0],
-                  [0, 0, 10, 10, 0, 10, 0, 10],
-                  [0, 0, 0, 0, 90, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 5],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 40, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 4, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
                 ],
               ]);
             }}
@@ -545,6 +800,65 @@ function Play() {
         </li>
       </ul>
       <section>
+        {/* debug */}
+        <div
+          style={{
+            position: "absolute",
+
+            zIndex: 999,
+            pointerEvents: "none",
+          }}
+        >
+          {attackedPositionWhite.map((row, rowIndex) => (
+            <div key={`attack-row-${rowIndex}`} style={{ display: "flex" }}>
+              {row.map((tileValue, tileIndex) => (
+                <div
+                  key={`attack-tile-${tileIndex}`}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "green",
+                  }}
+                >
+                  {tileValue}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 999,
+            top: "140px",
+            pointerEvents: "none",
+          }}
+        >
+          {attackedPositionBlack.map((row, rowIndex) => (
+            <div key={`attack-row-${rowIndex}`} style={{ display: "flex" }}>
+              {row.map((tileValue, tileIndex) => (
+                <div
+                  key={`attack-tile-${tileIndex}`}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "red",
+                    opacity: "50%",
+                  }}
+                >
+                  {tileValue}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* main board */}
         <div>
           {chessBoard.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: "flex" }}>
@@ -570,6 +884,7 @@ function Play() {
                             ? "#ffd36b"
                             : "#5c4000",
                       display: "flex",
+                      position: "relative",
                       alignItems: "center",
                       justifyContent: "center",
                       padding: "4px",
