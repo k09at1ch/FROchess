@@ -1,7 +1,5 @@
-/* eslint-disable no-constant-binary-expression */
-/* eslint-disable no-constant-condition */
-/* eslint-disable no-empty */
 /* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import blackPawn from "../../assets/black-no-bg/nigga-pawn-removebg.png";
 import blackRook from "../../assets/black-no-bg/nigga-rook-removebg.png";
 import blackKnight from "../../assets/black-no-bg/nigga-knight-removebg.png";
@@ -20,10 +18,23 @@ import logoImg from "/public/frochess-logo.png";
 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import "./play.css";
+//placing pieces
+//on/off move order check
+//en passant
+//casttles
+//checkmate
+//menu
+//engine
+//styles
+//accounts
+//multiplayer???
+//piece redactor???
 
 function Play() {
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [prevPosition, setPrevPosition] = useState([null, null]);
+  const [isTurnCheck, setIsTurnCheck] = useState(false);
   const [moveAmount, setMoveAmount] = useState(() => {
     const savedMoveAmount = localStorage.getItem("moveAmount");
     return savedMoveAmount && savedMoveAmount !== "undefined"
@@ -54,11 +65,11 @@ function Play() {
     return savedPosition && savedPosition !== "undefined"
       ? JSON.parse(savedPosition)
       : [
-          [0, 0, 0, 0, 0, 0, 0, 5],
           [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 40, 0, 0, 0],
+          [0, 0, 0, 0, 20, 0, 0, 0],
           [0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 4, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 2, 0, 0, 0, 0],
           [0, 0, 0, 0, 0, 0, 0, 0],
           [0, 0, 0, 0, 0, 0, 0, 0],
           [0, 0, 0, 0, 0, 0, 0, 0],
@@ -106,147 +117,16 @@ function Play() {
       [0, 0, 0, 0, 0, 0, 0, 0],
     ];
   });
-  const checkCheckBlack = () => {
-    const newAttackPosition = attackedPositionBlack.map((row) => [...row]);
-    for (let x = 0; x < 8; x++) {
-      for (let y = 0; y < 8; y++) {
-        const pieceType = position[x][y];
-        if (pieceType === 5) {
-          for (let i = x + 1; i < 8; i++) {
-            newAttackPosition[i][y] = 5;
-            if (position[i][y] !== 0) break;
-          }
-          for (let i = x - 1; i >= 0; i--) {
-            newAttackPosition[i][y] = 5;
-            if (position[i][y] !== 0) break;
-          }
-          for (let j = y + 1; j < 8; j++) {
-            newAttackPosition[x][j] = 5;
-            if (position[x][j] !== 0) break;
-          }
-          for (let j = y - 1; j >= 0; j--) {
-            newAttackPosition[x][j] = 5;
-            if (position[x][j] !== 0) break;
-          }
-        }
-        if (pieceType === 1) {
-          newAttackPosition[x + 1][y - 1] = 1;
-          newAttackPosition[x + 1][y + 1] = 1;
-        }
-        if (pieceType === 3) {
-          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
-            newAttackPosition[i][g] = 3;
-            if (position[i][g] !== 0) break;
-          }
-          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
-            newAttackPosition[i][g] = 3;
-            if (position[i][g] !== 0) break;
-          }
-          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
-            newAttackPosition[i][g] = 3;
-            if (position[i][g] !== 0) break;
-          }
-          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
-            newAttackPosition[i][g] = 3;
-            if (position[i][g] !== 0) break;
-          }
-        }
-        if (pieceType === 4) {
-          newAttackPosition[x+2][y+1]=4
-          newAttackPosition[x+2][y-1]=4
-          newAttackPosition[x-2][y+1]=4
-          newAttackPosition[x-2][y-1]=4
-
-          newAttackPosition[x+1][y+2]=4
-          newAttackPosition[x-1][y+2]=4
-          newAttackPosition[x+1][y-2]=4
-          newAttackPosition[x-1][y-2]=4
-        }
-        if (newAttackPosition[x].length > 8) {
-          newAttackPosition[x].pop();
-        }
-      }
-    }
-    setAttackedPositionBlack(newAttackPosition);
-  };
-  //CHECK LOGIC(the most complicated thing)
-  const checkCheckWhite = () => {
-    const newAttackPosition = attackedPositionWhite.map((row) => [...row]);
-    for (let x = 0; x < 8; x++) {
-      for (let y = 0; y < 8; y++) {
-        // console.log("piece:", position[x][y], "x", x, "y", y);
-        const pieceType = position[x][y];
-        if (pieceType === 10) {
-          newAttackPosition[x - 1][y - 1] = 10;
-          newAttackPosition[x - 1][y + 1] = 10;
-        }
-        if (pieceType === 50) {
-          for (let i = x + 1; i < 8; i++) {
-            newAttackPosition[i][y] = 50;
-            if (position[i][y] !== 0) break;
-          }
-          for (let i = x - 1; i >= 0; i--) {
-            newAttackPosition[i][y] = 50;
-            if (position[i][y] !== 0) break;
-          }
-          for (let j = y + 1; j < 8; j++) {
-            newAttackPosition[x][j] = 50;
-            if (position[x][j] !== 0) break;
-          }
-          for (let j = y - 1; j >= 0; j--) {
-            newAttackPosition[x][j] = 50;
-            if (position[x][j] !== 0) break;
-          }
-        }
-        if (pieceType === 30) {
-          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
-            newAttackPosition[i][g] = 30;
-            if (position[i][g] !== 0) break;
-          }
-          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
-            newAttackPosition[i][g] = 30;
-            if (position[i][g] !== 0) break;
-          }
-          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
-            newAttackPosition[i][g] = 30;
-            if (position[i][g] !== 0) break;
-          }
-          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
-            newAttackPosition[i][g] = 30;
-            if (position[i][g] !== 0) break;
-          }
-        }
-        if(pieceType===40){
-          newAttackPosition[x+2][y+1]=40
-          newAttackPosition[x+2][y-1]=40
-          newAttackPosition[x-2][y+1]=40
-          newAttackPosition[x-2][y-1]=40
-
-          newAttackPosition[x+1][y+2]=40
-          newAttackPosition[x-1][y+2]=40
-          newAttackPosition[x+1][y-2]=40
-          newAttackPosition[x-1][y-2]=40
-        }
-        if (newAttackPosition[x].length > 8) {
-          newAttackPosition[x].pop();
-        }
-      }
-    }
-    setAttackedPositionWhite(newAttackPosition);
-  };
   //move and position updte local storage
   useEffect(() => {
     localStorage.setItem("position", JSON.stringify(position));
     localStorage.setItem("moveAmount", JSON.stringify(moveAmount));
     localStorage.setItem("moveAmountArray", JSON.stringify(moveAmountArray));
     localStorage.setItem("positionArray", JSON.stringify(positionArray));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkCheckWhite();
+    checkCheckBlack();
   }, [position, moveAmount, positionArray, moveAmountArray]);
-  //position history log
-  // useEffect(() => {
-  //   for (let i = 0; i < positionArray.length; i++) {
-  //     console.table(i, positionArray[i]);
-  //   }
-  // }, [positionArray]);
 
   // {position upd after reload}
   useEffect(() => {
@@ -255,7 +135,6 @@ function Play() {
     setMoveAmountArray(moveAmount);
     checkCheckWhite();
     checkCheckBlack();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isDisabledButtonForArrowRight = moveAmount === moveAmountArray;
@@ -316,7 +195,7 @@ function Play() {
   };
   const reset = () => {
     setSelectedPiece(null);
-    setPrevPosition([]);
+    setPrevPosition([null, null]);
   };
   const moveBack = () => {
     setPosition(positionArray[moveAmountArray - 1]);
@@ -328,6 +207,8 @@ function Play() {
   };
   //main logic
   const firstClick = (rowIndex, tileIndex, currentPiece) => {
+    checkCheckWhite();
+    checkCheckBlack();
     console.log("piece:", currentPiece);
     if (currentPiece !== 0) {
       setSelectedPiece(currentPiece);
@@ -335,6 +216,8 @@ function Play() {
     setPrevPosition([rowIndex, tileIndex]);
   };
   const secondClick = (rowIndex, tileIndex, currentPiece) => {
+    checkCheckWhite();
+    checkCheckBlack();
     console.log(
       "curremtPiece:",
       selectedPiece,
@@ -347,12 +230,26 @@ function Play() {
       "piece",
       currentPiece,
     );
-
+    //testing pieces placing logic
+    if (prevPosition[0] === null) {
+      const newPosition = position.map((row) => [...row]);
+      newPosition[rowIndex][tileIndex] = selectedPiece;
+      setPosition(newPosition);
+      setPositionArray([...positionArray, newPosition]);
+      setMoveAmount(moveAmount + 1);
+      setMoveAmountArray(moveAmountArray + 1);
+      reset();
+      return;
+    }
     //move order check
     if (currentPiece !== 1488) {
       if (
-        (moveAmount % 2 === 0 && teamCheck(selectedPiece) === "black") ||
-        (moveAmount % 2 !== 0 && teamCheck(selectedPiece) === "white")
+        (moveAmount % 2 === 0 &&
+          teamCheck(selectedPiece) === "black" &&
+          isTurnCheck) ||
+        (moveAmount % 2 !== 0 &&
+          teamCheck(selectedPiece) === "white" &&
+          isTurnCheck)
       ) {
         reset();
         return;
@@ -643,8 +540,26 @@ function Play() {
         return false;
       }
     };
-    if (selectedPiece === 20 || selectedPiece === 2) {
-      if (!checkLegalMoveKing()) {
+    if (selectedPiece === 20) {
+      if (
+        !checkLegalMoveKing() ||
+        attackedPositionBlack[rowIndex][tileIndex] !== 0
+      ) {
+        reset();
+        return;
+      } else if (checkMate()) {
+        reset();
+        return;
+      }
+    }
+    if (selectedPiece === 2) {
+      if (
+        !checkLegalMoveKing() ||
+        attackedPositionWhite[rowIndex][tileIndex] !== 0
+      ) {
+        reset();
+        return;
+      } else if (checkMate()) {
         reset();
         return;
       }
@@ -713,8 +628,20 @@ function Play() {
     setMoveAmount(moveAmount + 1);
     setMoveAmountArray(moveAmountArray + 1);
   };
+  const checkMate = () => {
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        const pieceType = position[x][y];
+        if (pieceType === 2) {
+          console.log("nigaKing:", "x", x, "y", y);
+        }
+      }
+    }
+  };
   //just click handle
   const handleMovePlace = (rowIndex, tileIndex, currentPiece) => {
+    checkCheckWhite();
+    checkCheckBlack();
     console.log("TEMA", teamCheck(position[rowIndex][tileIndex]));
     console.log("moveAmountArray:", moveAmountArray, "moveAmount:", moveAmount);
     if (moveAmountArray !== positionArray.length - 1) {
@@ -726,6 +653,259 @@ function Play() {
       secondClick(rowIndex, tileIndex, currentPiece);
     }
   };
+  //CHECK LOGIC(the most complicated thing)
+  const checkCheckBlack = () => {
+    const newAttackPosition = Array(8)
+      .fill(null)
+      .map(() => Array(8).fill(0));
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        const pieceType = position[x][y];
+        if (pieceType === 5) {
+          for (let i = x + 1; i < 8; i++) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let i = x - 1; i >= 0; i--) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let j = y + 1; j < 8; j++) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+          for (let j = y - 1; j >= 0; j--) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+        }
+        if (pieceType === 1) {
+          newAttackPosition[x + 1][y - 1] = 1;
+          newAttackPosition[x + 1][y + 1] = 1;
+        }
+        if (pieceType === 3) {
+          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+        }
+        if (pieceType === 4) {
+          if (newAttackPosition[x + 2]) {
+            newAttackPosition[x + 2][y + 1] = 1;
+            newAttackPosition[x + 2][y - 1] = 1;
+          }
+          if (newAttackPosition[x - 2]) {
+            newAttackPosition[x - 2][y + 1] = 1;
+            newAttackPosition[x - 2][y - 1] = 1;
+          }
+          if (newAttackPosition[x + 1]) {
+            newAttackPosition[x + 1][y + 2] = 1;
+            newAttackPosition[x + 1][y - 2] = 1;
+          }
+          if (newAttackPosition[x - 1]) {
+            newAttackPosition[x - 1][y + 2] = 1;
+            newAttackPosition[x - 1][y - 2] = 1;
+          }
+        }
+        if (pieceType === 2) {
+          if (newAttackPosition[x - 1]) {
+            newAttackPosition[x - 1][y] = 1;
+            newAttackPosition[x - 1][y + 1] = 1;
+            newAttackPosition[x - 1][y - 1] = 1;
+          }
+          if (newAttackPosition[x]) {
+            newAttackPosition[x][y + 1] = 1;
+            newAttackPosition[x][y - 1] = 1;
+          }
+          if (newAttackPosition[x + 1]) {
+            newAttackPosition[x + 1][y] = 1;
+            newAttackPosition[x + 1][y + 1] = 1;
+            newAttackPosition[x + 1][y - 1] = 1;
+          }
+        }
+        if (pieceType === 9) {
+          for (let i = x + 1; i < 8; i++) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let i = x - 1; i >= 0; i--) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let j = y + 1; j < 8; j++) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+          for (let j = y - 1; j >= 0; j--) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+        }
+        if (newAttackPosition[x].length > 8) {
+          newAttackPosition[x].pop();
+        }
+      }
+    }
+    setAttackedPositionBlack(newAttackPosition);
+  };
+  const checkCheckWhite = () => {
+    const newAttackPosition = Array(8)
+      .fill(null)
+      .map(() => Array(8).fill(0));
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        // console.log("piece:", position[x][y], "x", x, "y", y);
+        const pieceType = position[x][y];
+        if (pieceType === 10) {
+          newAttackPosition[x - 1][y - 1] = 1;
+          newAttackPosition[x - 1][y + 1] = 1;
+        }
+        if (pieceType === 50) {
+          for (let i = x + 1; i < 8; i++) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let i = x - 1; i >= 0; i--) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let j = y + 1; j < 8; j++) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+          for (let j = y - 1; j >= 0; j--) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+        }
+        if (pieceType === 30) {
+          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+        }
+        if (pieceType === 40) {
+          if (newAttackPosition[x + 2]) {
+            newAttackPosition[x + 2][y + 1] = 1;
+            newAttackPosition[x + 2][y - 1] = 1;
+          }
+          if (newAttackPosition[x - 2]) {
+            newAttackPosition[x - 2][y + 1] = 1;
+            newAttackPosition[x - 2][y - 1] = 1;
+          }
+          if (newAttackPosition[x + 1]) {
+            newAttackPosition[x + 1][y + 2] = 1;
+            newAttackPosition[x + 1][y - 2] = 1;
+          }
+          if (newAttackPosition[x - 1]) {
+            newAttackPosition[x - 1][y + 2] = 1;
+            newAttackPosition[x - 1][y - 2] = 1;
+          }
+        }
+        if (pieceType === 20) {
+          if (newAttackPosition[x - 1]) {
+            newAttackPosition[x - 1][y] = 1;
+            newAttackPosition[x - 1][y + 1] = 1;
+            newAttackPosition[x - 1][y - 1] = 1;
+          }
+          if (newAttackPosition[x]) {
+            newAttackPosition[x][y + 1] = 1;
+            newAttackPosition[x][y - 1] = 1;
+          }
+          if (newAttackPosition[x + 1]) {
+            newAttackPosition[x + 1][y] = 1;
+            newAttackPosition[x + 1][y + 1] = 1;
+            newAttackPosition[x + 1][y - 1] = 1;
+          }
+        }
+        if (pieceType === 90) {
+          for (let i = x + 1; i < 8; i++) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let i = x - 1; i >= 0; i--) {
+            newAttackPosition[i][y] = 1;
+            if (position[i][y] !== 0) break;
+          }
+          for (let j = y + 1; j < 8; j++) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+          for (let j = y - 1; j >= 0; j--) {
+            newAttackPosition[x][j] = 1;
+            if (position[x][j] !== 0) break;
+          }
+          for (let i = x + 1, g = y + 1; i < 8 && g < 8; i++, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x + 1, g = y - 1; i < 8 && g >= 0; i++, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y + 1; i >= 0 && g < 8; i--, g++) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+          for (let i = x - 1, g = y - 1; i >= 0 && g >= 0; i--, g--) {
+            newAttackPosition[i][g] = 1;
+            if (position[i][g] !== 0) break;
+          }
+        }
+        if (newAttackPosition[x].length > 8) {
+          newAttackPosition[x].pop();
+        }
+      }
+    }
+    setAttackedPositionWhite(newAttackPosition);
+  };
+  const turnCheck = () => {
+    if (isTurnCheck) {
+      setIsTurnCheck(false);
+    } else if (!isTurnCheck) {
+      setIsTurnCheck(true);
+    }
+  };
   return (
     <div>
       <button onClick={() => navigate("/")}>
@@ -734,8 +914,157 @@ function Play() {
           alt="Logo"
           style={{ width: "60px", height: "90px" }}
         />
-      </button>{" "}
+      </button>
+
       <h1>Play</h1>
+      {/* is turn check on */}
+      <ul className="testPiecePlaceList">
+        <li>
+          <button onClick={turnCheck}>Is move check ON???(For testing)</button>
+        </li>
+        <li>
+          <button
+            disabled={true}
+            style={{ background: isTurnCheck ? "green" : "red" }}
+          >
+            {isTurnCheck ? "Y" : "N"}
+          </button>
+        </li>
+      </ul>
+      <ul className="testPiecePlaceList">
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(1);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(1)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(2);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(2)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(3);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(3)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(4);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(4)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(5);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(5)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(9);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(9)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(10);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(10)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(20);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(20)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(30);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(30)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(40);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(40)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(50);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(50)}
+          </button>
+        </li>
+        <li className="testPiecePlace">
+          <button
+            onClick={() => {
+              setSelectedPiece(90);
+              console.log(selectedPiece);
+            }}
+            className="testPiece"
+          >
+            {pieceType(90)}
+          </button>
+        </li>
+      </ul>
       <ul
         style={{
           listStyle: "none",
@@ -745,6 +1074,7 @@ function Play() {
         }}
       >
         <li>
+          {/* <> && reset game */}
           <button
             style={{ padding: "2px 15px" }}
             onClick={() => {
@@ -754,22 +1084,22 @@ function Play() {
               setMoveAmount(0);
               setMoveAmountArray(0);
               setPosition([
-                [0, 0, 0, 0, 0, 0, 0, 5],
                 [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 40, 0, 0, 0],
+                [0, 0, 0, 0, 20, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 4, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 2, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0],
               ]);
               setPositionArray([
                 [
-                  [0, 0, 0, 0, 0, 0, 0, 5],
                   [0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 40, 0, 0, 0],
+                  [0, 0, 0, 0, 20, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 4, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 2, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0],
@@ -801,6 +1131,7 @@ function Play() {
       </ul>
       <section>
         {/* debug */}
+        {/* attack position white */}
         <div
           style={{
             position: "absolute",
@@ -809,6 +1140,7 @@ function Play() {
             pointerEvents: "none",
           }}
         >
+          
           {attackedPositionWhite.map((row, rowIndex) => (
             <div key={`attack-row-${rowIndex}`} style={{ display: "flex" }}>
               {row.map((tileValue, tileIndex) => (
@@ -829,11 +1161,12 @@ function Play() {
             </div>
           ))}
         </div>
+        {/* attack position black */}
         <div
           style={{
             position: "absolute",
             zIndex: 999,
-            top: "140px",
+            top: "220px",
             pointerEvents: "none",
           }}
         >
@@ -849,7 +1182,6 @@ function Play() {
                     alignItems: "center",
                     justifyContent: "center",
                     color: "red",
-                    opacity: "50%",
                   }}
                 >
                   {tileValue}
@@ -864,29 +1196,38 @@ function Play() {
             <div key={rowIndex} style={{ display: "flex" }}>
               {row.map((tile, tileIndex) => {
                 const currentPiece = position[rowIndex][tileIndex];
+                const isWhiteKingInCheck =
+                  currentPiece === 20 &&
+                  attackedPositionBlack[rowIndex][tileIndex] === 1;
+                const isBlackKingInCheck =
+                  currentPiece === 2 &&
+                  attackedPositionWhite[rowIndex][tileIndex] === 1;
+                const isKingInCheck = isWhiteKingInCheck || isBlackKingInCheck;
                 return (
                   <button
                     key={tileIndex}
                     onClick={() => {
                       handleMovePlace(rowIndex, tileIndex, currentPiece);
                     }}
+                    className={isKingInCheck ? "king-in-check" : ""}
                     style={{
                       border: "none",
                       width: "100px",
                       height: "100px",
                       backgroundColor:
                         prevPosition &&
-                        prevPosition[0] === rowIndex &&
-                        prevPosition[1] === tileIndex &&
-                        selectedPiece > 0
-                          ? "#807841"
-                          : tile === 1
-                            ? "#ffd36b"
-                            : "#5c4000",
+                              prevPosition[0] === rowIndex &&
+                              prevPosition[1] === tileIndex &&
+                              selectedPiece > 0
+                            ? "#807841"
+                            : tile === 1
+                              ? "#ffd36b"
+                              : "#5c4000",
                       display: "flex",
                       position: "relative",
                       alignItems: "center",
                       justifyContent: "center",
+
                       padding: "4px",
                       boxSizing: "border-box",
                       cursor: currentPiece > 0 ? "pointer" : "default",
