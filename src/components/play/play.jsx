@@ -19,8 +19,7 @@ import logoImg from "/public/frochess-logo.png";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./play.css";
-//placing pieces
-//on/off move order check
+
 //en passant
 //casttles
 //checkmate
@@ -126,6 +125,7 @@ function Play() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     checkCheckWhite();
     checkCheckBlack();
+    checkMate()
   }, [position, moveAmount, positionArray, moveAmountArray]);
 
   // {position upd after reload}
@@ -632,7 +632,11 @@ function Play() {
     for (let x = 0; x < 8; x++) {
       for (let y = 0; y < 8; y++) {
         const pieceType = position[x][y];
-        if (pieceType === 2) {
+        const isLegalMoveForKingWhite=()=>{
+
+        }
+        if (pieceType === 2 && attackedPositionWhite[x][y] === 1) {
+          //disabled board === true 
           console.log("nigaKing:", "x", x, "y", y);
         }
       }
@@ -915,7 +919,7 @@ function Play() {
           style={{ width: "60px", height: "90px" }}
         />
       </button>
-
+      {checkMate()}
       <h1>Play</h1>
       {/* is turn check on */}
       <ul className="testPiecePlaceList">
@@ -1140,7 +1144,6 @@ function Play() {
             pointerEvents: "none",
           }}
         >
-          
           {attackedPositionWhite.map((row, rowIndex) => (
             <div key={`attack-row-${rowIndex}`} style={{ display: "flex" }}>
               {row.map((tileValue, tileIndex) => (
@@ -1216,13 +1219,13 @@ function Play() {
                       height: "100px",
                       backgroundColor:
                         prevPosition &&
-                              prevPosition[0] === rowIndex &&
-                              prevPosition[1] === tileIndex &&
-                              selectedPiece > 0
-                            ? "#807841"
-                            : tile === 1
-                              ? "#ffd36b"
-                              : "#5c4000",
+                        prevPosition[0] === rowIndex &&
+                        prevPosition[1] === tileIndex &&
+                        selectedPiece > 0
+                          ? "#807841"
+                          : tile === 1
+                            ? "#ffd36b"
+                            : "#5c4000",
                       display: "flex",
                       position: "relative",
                       alignItems: "center",
